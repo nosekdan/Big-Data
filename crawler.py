@@ -4,20 +4,14 @@ from bs4 import BeautifulSoup
 
 # IMPORTANT INFO: to be able to run this, you need to install bs4, requests, gutenbergpy libraries (pip install ...)
 
-# Since Gutenberg project website protects against scraping,
-# we should add more methods to retrieve the data.
-# One option is to scrape the id (I think we will need that always)
-# and then we can use gutenbergpy or download it all from the archive as said in the website's source code.
-
-
 # TODO: get from DB, used to download only new items from the source
 last_local_id = 0 
 
-def get_book(id, clean):
+def get_book(id):
     # This gets a book by its gutenberg id number
     raw_book = gutenbergpy.textget.get_text_by_id(id) # with headers
     clean_book = gutenbergpy.textget.strip_headers(raw_book) # without headers
-    return clean_book if clean else raw_book
+    return [id, clean_book]
 
 
 def get_last_released_book_id():
@@ -35,15 +29,26 @@ def get_last_released_book_id():
             return id
     return None
 
-def get_books(clean = False, id_first = 1, id_last = get_last_released_book_id()):
+# First id is included, the last one excluded, following the norm
+def get_books(id_first = 1, id_last = get_last_released_book_id()):
     books = []
     for id in range(id_first, id_last):
-        books.append(get_book(id, clean))
+        books.append(get_book(id))
     return books
 
-def get_new_books(clean):
+def get_new_books():
     start = last_local_id
     end = get_last_released_book_id()
-    return get_books(clean, start, end)
+    return get_books(start, end)
+    
 
-print(get_books(False, 1, 5))
+
+def store_books(id_first, id_last = 0):
+    books = get_books(id_first, id_last)
+    # connect to db
+    # insert to db
+    # mongodb.insert(books)
+
+
+# Testing
+# print(get_books(4, 5))
