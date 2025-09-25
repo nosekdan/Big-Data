@@ -1,6 +1,7 @@
 import gutenbergpy.textget
 import requests
 from bs4 import BeautifulSoup
+import repository_connection as repo
 
 # IMPORTANT INFO: to be able to run this, you need to install bs4, requests, gutenbergpy libraries (pip install ...)
 
@@ -46,9 +47,10 @@ def get_new_books():
 def store_books(id_first, id_last = 0):
     books = get_books(id_first, id_last)
     # connect to db
+    repo.connect_to_db()
     # insert to db
-    # mongodb.insert(books)
-
+    repo.insert_into_db(books)
 
 # Testing
 # print(get_books(4, 5))
+store_books(4, 6)
