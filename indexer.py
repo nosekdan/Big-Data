@@ -5,7 +5,7 @@ import json
 import sqlite3
 from pathlib import Path
 from pymongo import MongoClient
-from repository_connection import collection  # reuses your MongoDB "books" collection
+from repository_connection import collection, db
 
 # ----------------------
 # PATHS & CONTROL FILES
@@ -32,8 +32,7 @@ sql_conn.commit()
 
 # MongoDB (datamart 2)
 mongo_client = MongoClient("mongodb://localhost:27017/")
-mongo_db = mongo_client["BigData"]
-mongo_index = mongo_db["inverted_index"]
+mongo_index = db["invertedIndex"]
 mongo_index.create_index("term", unique=True)
 
 # ----------------------
