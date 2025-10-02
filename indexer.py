@@ -1,39 +1,16 @@
 # indexer.py
-import os
 import re
 import json
-import sqlite3
 from pathlib import Path
-from pymongo import MongoClient
-from repository_connection import collection, db
+from repository_connection import collection
 
 # ----------------------
-# PATHS & CONTROL FILES
+# FILESYSTEM INDEX SETUP
 # ----------------------
-CONTROL_DIR = Path("control")
-CONTROL_DIR.mkdir(parents=True, exist_ok=True)
+FS_DIR = Path("../database")
+FS_DIR.mkdir(parents=True, exist_ok=True)
 
-INDEXED_FILE = CONTROL_DIR / "indexed_books.txt"
-
-# ----------------------
-# DATABASE SETUP
-# ----------------------
-
-# SQLite (datamart 1)
-sql_conn = sqlite3.connect("datamarts/inverted_index.db")
-sql_cur = sql_conn.cursor()
-sql_cur.execute("""
-CREATE TABLE IF NOT EXISTS inverted_index (
-    term TEXT PRIMARY KEY,
-    postings TEXT -- JSON array of book_ids
-)
-""")
-sql_conn.commit()
-
-# MongoDB (datamart 2)
-mongo_client = MongoClient("mongodb://localhost:27017/")
-mongo_index = db["invertedIndex"]
-mongo_index.create_index("term", unique=True)
+INDEXED_FILE = Path("../database/indexed_books.txt")
 
 # ----------------------
 # TOKENIZER
@@ -41,44 +18,57 @@ mongo_index.create_index("term", unique=True)
 def tokenize(text: str):
     """Simple tokenizer: lowercase, only words of 2+ letters."""
     return re.findall(r"\b[a-z]{2,}\b", text.lower())
+  
+# ----------------------
+# FILESYSTEM UPDATE
+# ----------------------
+def update_fs(term: str, book_id: int):
+    """Store postings list for one term in its own file under its first letter folder."""
+    first_letter = term[0].lower()
+    subdir = FS_DIR / first_letter
+    subdir.mkdir(parents=True, exist_ok=True)
 
-# ----------------------
-# UPDATE FUNCTIONS
-# ----------------------
-def update_sql(term, book_id):
-    sql_cur.execute("SELECT postings FROM inverted_index WHERE term=?", (term,))
-    row = sql_cur.fetchone()
-    if row:
-        postings = json.loads(row[0])
-        if book_id not in postings:
-            postings.append(book_id)
-            sql_cur.execute("UPDATE inverted_index SET postings=? WHERE term=?",
-                            (json.dumps(postings), term))
+    file_path = subdir / f"{term}.json"
+
+    if file_path.exists():
+        with open(file_path, "r", encoding="utf-8") as f:
+            postings = json.load(f)["postings"]
     else:
-        sql_cur.execute("INSERT INTO inverted_index (term, postings) VALUES (?, ?)",
-                        (term, json.dumps([book_id])))
+        postings = []
 
-def update_mongo(term, book_id):
-    mongo_index.update_one(
-        {"term": term},
-        {"$addToSet": {"postings": book_id}},
-        upsert=True
-    )
+    if book_id not in postings:
+        postings.append(book_id)
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump({"term": term, "postings": postings}, f, indent=2)
+            
+# ----------------------
+# FILESYSTEM SEARCH
+# ----------------------
+
+def search_fs(term: str):
+    """Return postings for a term if it exists in filesystem index."""
+    first_letter = term[0].lower()
+    file_path = FS_DIR / first_letter / f"{term}.json"
+    if not file_path.exists():
+        return []
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)["postings"]
 
 # ----------------------
 # INDEXING LOGIC
 # ----------------------
 def process_book(book_id: int, text: str):
+    if already_indexed(book_id):
+        print(f"⚠️ Book {book_id} already indexed, skipping.")
+        return
     words = set(tokenize(text))
-    sql_cur.execute("BEGIN TRANSACTION")
     for term in words:
-        update_sql(term, book_id)
-        update_mongo(term, book_id)
-    sql_conn.commit()
+        update_fs(term, book_id)
     mark_indexed(book_id)
     print(f"✅ Indexed book {book_id} ({len(words)} unique terms).")
 
 def mark_indexed(book_id: int):
+    INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(INDEXED_FILE, "a", encoding="utf-8") as f:
         f.write(f"{book_id}\n")
 
