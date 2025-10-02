@@ -76,6 +76,10 @@ def reindex_all_books():
         process_book(book_id, text)
 
 if __name__ == "__main__":
-  #TODO: event driven, by a change in the database
-    reindex_all_books()
-    print("🎉 Indexing complete.")
+    with collection.watch([{"$match": {"operationType": {"$ne": "delete"}}}]) as stream:
+        print("Watching for changes in the 'books' collection...")
+        for change in stream:
+            print("Change detected!")
+            reindex_all_books()
+            print("🎉 Indexing complete.")
+            print("Watching for changes in the 'books' collection...")
