@@ -40,19 +40,6 @@ def update_fs(term: str, book_id: int):
         postings.append(book_id)
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump({"term": term, "postings": postings}, f, indent=2)
-            
-# ----------------------
-# FILESYSTEM SEARCH
-# ----------------------
-
-def search_fs(term: str):
-    """Return postings for a term if it exists in filesystem index."""
-    first_letter = term[0].lower()
-    file_path = FS_DIR / first_letter / f"{term}.json"
-    if not file_path.exists():
-        return []
-    with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)["postings"]
 
 # ----------------------
 # INDEXING LOGIC
@@ -89,5 +76,6 @@ def reindex_all_books():
         process_book(book_id, text)
 
 if __name__ == "__main__":
+  #TODO: event driven, by a change in the database
     reindex_all_books()
     print("🎉 Indexing complete.")
