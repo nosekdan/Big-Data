@@ -58,9 +58,6 @@ def search_fs(term: str):
 # INDEXING LOGIC
 # ----------------------
 def process_book(book_id: int, text: str):
-    if already_indexed(book_id):
-        print(f"⚠️ Book {book_id} already indexed, skipping.")
-        return
     words = set(tokenize(text))
     for term in words:
         update_fs(term, book_id)
@@ -86,6 +83,7 @@ def reindex_all_books():
     for doc in collection.find():
         book_id = doc["id"]
         if already_indexed(book_id):
+            print(f"⚠️  Book {book_id} already indexed, skipping.")
             continue
         text = doc["content"]
         process_book(book_id, text)

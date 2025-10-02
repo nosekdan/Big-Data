@@ -50,9 +50,9 @@ def store_books(id_first, id_last = 0):
     books = get_books(id_first, id_last)
     # connect to db
     repo.connect_to_db()
-    # insert to db
+    # insert to db (TODO: remove first entry, if book already downloaded before)
     repo.insert_into_db(books)
-    INDEXED_FILE.mkdir(parents=True, exist_ok=True)
+    INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(INDEXED_FILE, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
         ids = [int(line) for line in lines]
@@ -66,4 +66,4 @@ def store_books(id_first, id_last = 0):
 
 # Testing
 # print(get_books(4, 5))
-store_books(4, 6)
+store_books(8, 9)

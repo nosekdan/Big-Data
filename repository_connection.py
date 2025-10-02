@@ -18,6 +18,11 @@ def insert_into_db(books):
     if not books:
         print("No books to insert.")
         return
+    for book in books:
+        if collection.find_one({"id": book[0]}):
+            print(f"⚠️ Book with ID {book[0]} already exists in the database, deleting the old entry.")
+            collection.delete_one({"id": book[0]})
+            continue
 
     documents = [{"id": book[0], "content": book[1].decode("utf-8", errors="ignore")} for book in books]
 
