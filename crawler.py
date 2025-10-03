@@ -53,9 +53,14 @@ def store_books(id_first, id_last = 0):
     # insert to db
     repo.insert_into_db(books)
     INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(INDEXED_FILE, "r", encoding="utf-8") as f:
-        lines = f.read().splitlines()
-        ids = [int(line) for line in lines]
+    if INDEXED_FILE.exists():
+        with open(INDEXED_FILE, "r", encoding="utf-8") as f:
+            lines = f.read().splitlines()
+            ids = [int(line) for line in lines]
+    else:
+        # Datei existiert noch nicht → leere ID-Liste starten
+        ids = []
+        
     # filter out all IDs in the range [id_first, id_last)
     ids = [i for i in ids if not (id_first <= i < id_last)]
     
