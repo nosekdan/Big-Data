@@ -57,6 +57,7 @@ def process_book(book_id: int, text: str):
         update_fs(term, book_id)
     mark_indexed(book_id)
     print(f"✅ Indexed book {book_id} ({len(words)} unique terms).")
+    return None
 
 def mark_indexed(book_id: int):
     INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -90,4 +91,5 @@ if __name__ == "__main__":
             reindex_all_books()
             print("🎉 Indexing complete.")
             print("Watching for changes in the 'books' collection...")
+
 
