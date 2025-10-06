@@ -1,6 +1,7 @@
 import re
 import json
 from pathlib import Path
+import repository_connection as repo
 
 # ----------------------
 # FILESYSTEM INDEX SETUP
@@ -22,19 +23,37 @@ def search_fs(term: str):
         return json.load(f)["postings"]
       
 if __name__ == "__main__":
-    term = input("Enter search term: ").strip().lower()
-    # mehrere Suchbegriffe trennen (z.B. durch Leerzeichen)
-    terms = term.split()
-    if terms:
-        postings = set(search_fs(terms[0]))  # Annahme: search_fs gibt eine Liste von Indexen zurück
-        # weitere Terme nacheinander schneiden
-        for t in terms[1:]:
-            postings &= set(search_fs(t))  # Schnittmenge bilden
+    searchType = input("Do you wanna search for:\n1: Title\n2: Author\n3: Language\n4: Term\n")
+    match(searchType):
+        case "1":
+            title = input("Enter title: ").strip().lower()
+            repo.connect_to_db()
+            results = repo.search_in_metadata("title", title)
+            print("Matching books:", results)
+        case "2":
+            author = input("Enter author: ").strip().lower()
+            repo.connect_to_db()
+            results =  repo.search_in_metadata("author", author)
+            print("Matching books:", results)
+        case "3":
+            language = input("Enter language: ").strip().lower()
+            repo.connect_to_db()
+            results =  repo.search_in_metadata("language", language)
+            print("Matching books:", results)
+        case "4":
+            term = input("Enter search term/s: ").strip().lower()
+            # mehrere Suchbegriffe trennen (z.B. durch Leerzeichen)
+            terms = term.split()
+            if terms:
+                postings = set(search_fs(terms[0]))  # Annahme: search_fs gibt eine Liste von Indexen zurück
+                # weitere Terme nacheinander schneiden
+                for t in terms[1:]:
+                    postings &= set(search_fs(t))  # Schnittmenge bilden
 
-        if postings:
-            print(f"Found in books: {sorted(postings)}")
-        else:
-            print("No results found.")
-    else:
-        print("No input provided.")
-    print("🎉 Search complete.")
+                if postings:
+                    print(f"Found in books: {sorted(postings)}")
+                else:
+                    print("No results found.")
+            else:
+                print("No input provided.")
+            print("🎉 Search complete.")

@@ -1,4 +1,5 @@
 #import gutenbergpy.textget
+import re
 import requests
 from bs4 import BeautifulSoup
 import repository_connection as repo
@@ -22,8 +23,15 @@ def get_book(id):
     raw_book = response.text
     header, body_and_footer = raw_book.split(START_MARKER, 1)
     body, footer = body_and_footer.split(END_MARKER, 1)
-    book = {"header": header, "content": body, "footer": footer}
-    print(book["footer"])
+    title_match = re.search(r"Title:\s*([\s\S]*?)\n\s*\n", header, re.IGNORECASE)
+    title = title_match.group(1).strip() if title_match else "Unknown"
+    author_match = re.search(r"Author:\s*([\s\S]*?)\n\s*\n", header, re.IGNORECASE)
+    author = author_match.group(1).strip() if author_match else "Unknown"
+    release_date_match = re.search(r"Release date:\s*([\s\S]*?)\n\s*\n", header, re.IGNORECASE)
+    release_date = release_date_match.group(1).strip() if release_date_match else "Unknown"
+    language_match = re.search(r"Language:\s*([\s\S]*?)\n\s*\n", header, re.IGNORECASE)
+    language = language_match.group(1).strip() if language_match else "Unknown"
+    book = {"title": title, "author": author, "release_date": release_date, "language": language, "content": body, "footer": footer}
     return [id, book]
 
 
@@ -79,4 +87,4 @@ def store_books(id_first, id_last = 0):
 
 # Testing
 # print(get_books(4, 5))
-store_books(18, 19)
+store_books(4, 19)
