@@ -4,6 +4,13 @@ import json
 from pathlib import Path
 from repository_connection import collection
 
+#benchmarking
+def test_process_book_indexing_benchmark(benchmark):
+    dummy_text = generate_dummy_text()
+    dummy_id = random.randint(100000, 999999)
+    result = benchmark(process_book, dummy_id, dummy_text)
+    assert result is None
+
 # ----------------------
 # FILESYSTEM INDEX SETUP
 # ----------------------
@@ -83,3 +90,4 @@ if __name__ == "__main__":
             reindex_all_books()
             print("🎉 Indexing complete.")
             print("Watching for changes in the 'books' collection...")
+
