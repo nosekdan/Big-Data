@@ -22,7 +22,7 @@ def insert_into_db(books):
         for book in books:
             collection.replace_one(
                 {"id": book[0]},  # match by book ID
-                {"id": book[0], "content": book[1].decode("utf-8", errors="ignore")},
+                {"id": book[0], "header": book[1]["header"], "content": book[1]["content"], "footer": book[1]["footer"]},
                 upsert=True  # insert if not exists
             )
         print(f"Inserted/updated {len(books)} documents into the database.")

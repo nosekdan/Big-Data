@@ -1,4 +1,4 @@
-import gutenbergpy.textget
+#import gutenbergpy.textget
 import requests
 from bs4 import BeautifulSoup
 import repository_connection as repo
@@ -14,9 +14,17 @@ last_local_id = 0
 
 def get_book(id):
     # This gets a book by its gutenberg id number
-    raw_book = gutenbergpy.textget.get_text_by_id(id) # with headers
-    clean_book = gutenbergpy.textget.strip_headers(raw_book) # without headers
-    return [id, clean_book]
+    START_MARKER = "*** START OF THE PROJECT GUTENBERG EBOOK"
+    END_MARKER = "*** END OF THE PROJECT GUTENBERG EBOOK"
+    url = f"https://www.gutenberg.org/cache/epub/{id}/pg{id}.txt"
+    response = requests.get(url)
+    response.raise_for_status()
+    raw_book = response.text
+    header, body_and_footer = raw_book.split(START_MARKER, 1)
+    body, footer = body_and_footer.split(END_MARKER, 1)
+    book = {"header": header, "content": body, "footer": footer}
+    print(book["footer"])
+    return [id, book]
 
 
 def get_last_released_book_id():
@@ -71,4 +79,4 @@ def store_books(id_first, id_last = 0):
 
 # Testing
 # print(get_books(4, 5))
-store_books(8, 9)
+store_books(18, 19)
