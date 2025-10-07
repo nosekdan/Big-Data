@@ -50,10 +50,9 @@ Benchmark Metrics
 
 The following metrics were collected:
 
-- Indexing time (s): time required to build the index for the dataset
-- Index size (MB): storage footprint of the index
-- Query latency (ms): average response time for a set of test queries
-- Memory usage (MB): approximate memory consumption during queries
+- Tokenization speed
+- Search performance
+- Indexing speed
 
 Credits
 Project Group Members:
