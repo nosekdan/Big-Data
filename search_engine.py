@@ -13,14 +13,15 @@ FS_DIR.mkdir(parents=True, exist_ok=True)
 # FILESYSTEM SEARCH
 # ----------------------
 
-def search_fs(term: str):
-    """Return postings for a term if it exists in filesystem index."""
+def search_mdb(term: str):
+    """Return postings for a term if it exists in mongodb index."""
     first_letter = term[0].lower()
-    file_path = FS_DIR / first_letter / f"{term}.json"
-    if not file_path.exists():
-        return []
-    with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)["postings"]
+    db = repo.client["invertedIndex"]
+    collection = db[first_letter]  # Collection for the first letter
+    doc = collection.find_one({"term": term})
+    if doc:
+        return doc["postings"]
+    return []
       
 if __name__ == "__main__":
     searchType = input("Do you wanna search for:\n1: Title\n2: Author\n3: Language\n4: Term\n")
@@ -45,10 +46,10 @@ if __name__ == "__main__":
             # mehrere Suchbegriffe trennen (z.B. durch Leerzeichen)
             terms = term.split()
             if terms:
-                postings = set(search_fs(terms[0]))  # Annahme: search_fs gibt eine Liste von Indexen zurück
+                postings = set(search_mdb(terms[0]))  # Annahme: search_fs gibt eine Liste von Indexen zurück
                 # weitere Terme nacheinander schneiden
                 for t in terms[1:]:
-                    postings &= set(search_fs(t))  # Schnittmenge bilden
+                    postings &= set(search_mdb(t))  # Schnittmenge bilden
 
                 if postings:
                     print(f"Found in books: {sorted(postings)}")
