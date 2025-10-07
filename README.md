@@ -54,8 +54,6 @@ The following metrics were collected:
 - Index size (MB)  the storage footprint of the index.
 - Query latency (ms) the average response time for a set of test queries.
 - Memory usage (MB) approximate memory consumption during queries.
-  
-<img width="675" height="376" alt="image" src="https://github.com/user-attachments/assets/e9355ed1-570d-405f-bf3b-75d3dbf9b66c" />
 
 ## Credits
 **Project Group Members**:
