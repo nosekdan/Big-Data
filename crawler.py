@@ -1,14 +1,16 @@
-#import gutenbergpy.textget
 import re
 import requests
 from bs4 import BeautifulSoup
 import repository_connection as repo
 from pathlib import Path
 
-# IMPORTANT INFO: to be able to run this, you need to install bs4, requests, gutenbergpy libraries (pip install ...)
+# IMPORTANT INFO: to be able to run this, you need to install bs4, requests (pip install ...)
 
-# File, storing which books already got indexed
-INDEXED_FILE = Path("../database/indexed_books.txt")
+# ----------------------
+# CONTROL FILES SETUP
+# ----------------------
+INDEXED_FILE = Path("./control/indexed_books.txt")
+DOWNLOADS_FILE = Path("./control/downloaded_books.txt")
 
 # TODO: get from DB, used to download only new items from the source
 last_local_id = 0 
@@ -68,23 +70,28 @@ def store_books(id_first, id_last = 0):
     repo.connect_to_db()
     # insert to db
     repo.insert_into_db(books)
-    INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
-    if INDEXED_FILE.exists():
-        with open(INDEXED_FILE, "r", encoding="utf-8") as f:
-            lines = f.read().splitlines()
-            ids = [int(line) for line in lines]
-    else:
-        # Datei existiert noch nicht → leere ID-Liste starten
-        ids = []
+    mark_downloaded(id_first, id_last)
+    unmark_indexed(id_first, id_last)
         
+def mark_downloaded(id_first: int, id_last: int):
+    DOWNLOADS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(DOWNLOADS_FILE, "a", encoding="utf-8") as f:
+        for book_id in range(id_first, id_last):
+            f.write(f"{book_id}\n")
+            
+def unmark_indexed(id_first: int, id_last: int):
+    if not INDEXED_FILE.exists():
+        return
+    with open(INDEXED_FILE, "r", encoding="utf-8") as f:
+        lines = f.read().splitlines()
+        ids = [int(line) for line in lines]
     # filter out all IDs in the range [id_first, id_last)
     ids = [i for i in ids if not (id_first <= i < id_last)]
-    
     # write back updated IDs
     with open(INDEXED_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(str(i) for i in ids) + ("\n" if ids else ""))
-      
 
 # Testing
-# print(get_books(4, 5))
-# store_books(4, 19)
+if __name__ == "__main__":
+    # print(get_books(4, 5))
+    store_books(4, 19)

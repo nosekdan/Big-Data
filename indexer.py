@@ -5,12 +5,10 @@ from pathlib import Path
 from repository_connection import collection, client
 
 # ----------------------
-# FILESYSTEM INDEX SETUP
+# CONTROL FILES SETUP
 # ----------------------
-FS_DIR = Path("../mongodb_indexed")
-FS_DIR.mkdir(parents=True, exist_ok=True)
-
-INDEXED_FILE = Path("../mongodb_indexed/indexed_books.txt")
+INDEXED_FILE = Path("./control/indexed_books.txt")
+DOWNLOADS_FILE = Path("./control/downloaded_books.txt")
 
 # ----------------------
 # TOKENIZER
