@@ -76,6 +76,9 @@ def reindex_all_books():
         process_book(book_id, text)
 
 if __name__ == "__main__":
+    # Indexing all books once at the start
+    reindex_all_books()
+    # Watching for changes in the books collection
     with collection.watch([{"$match": {"operationType": {"$ne": "delete"}}}]) as stream:
         print("Watching for changes in the 'books' collection...")
         for change in stream:
