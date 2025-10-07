@@ -4,6 +4,13 @@ import json
 from pathlib import Path
 from repository_connection import collection
 
+#benchmarking
+def test_process_book_indexing_benchmark(benchmark):
+    dummy_text = generate_dummy_text()
+    dummy_id = random.randint(100000, 999999)
+    result = benchmark(process_book, dummy_id, dummy_text)
+    assert result is None
+
 # ----------------------
 # FILESYSTEM INDEX SETUP
 # ----------------------
@@ -50,6 +57,7 @@ def process_book(book_id: int, text: str):
         update_fs(term, book_id)
     mark_indexed(book_id)
     print(f"✅ Indexed book {book_id} ({len(words)} unique terms).")
+    return None
 
 def mark_indexed(book_id: int):
     INDEXED_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -86,3 +94,5 @@ if __name__ == "__main__":
             reindex_all_books()
             print("🎉 Indexing complete.")
             print("Watching for changes in the 'books' collection...")
+
+
