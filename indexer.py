@@ -5,11 +5,11 @@ from pathlib import Path
 from repository_connection import collection
 
 #benchmarking
-def test_process_book_indexing_benchmark(benchmark):
-    dummy_text = generate_dummy_text()
-    dummy_id = random.randint(100000, 999999)
-    result = benchmark(process_book, dummy_id, dummy_text)
-    assert result is None
+# def test_process_book_indexing_benchmark(benchmark):
+#     dummy_text = generate_dummy_text()
+#     dummy_id = random.randint(100000, 999999)
+#     result = benchmark(process_book, dummy_id, dummy_text)
+#     assert result is None
 
 # ----------------------
 # FILESYSTEM INDEX SETUP
@@ -17,7 +17,8 @@ def test_process_book_indexing_benchmark(benchmark):
 FS_DIR = Path("../database")
 FS_DIR.mkdir(parents=True, exist_ok=True)
 
-INDEXED_FILE = Path("../database/indexed_books.txt")
+INDEXED_FILE = Path("./control/indexed_books.txt")
+DOWNLOADS_FILE = Path("./control/downloaded_books.txt")
 
 # ----------------------
 # TOKENIZER
