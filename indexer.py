@@ -2,15 +2,15 @@
 import re
 import json
 from pathlib import Path
-from repository_connection import collection
+from repository_connection import collection, client
 
 # ----------------------
 # FILESYSTEM INDEX SETUP
 # ----------------------
-FS_DIR = Path("../database")
+FS_DIR = Path("../mongodb_indexed")
 FS_DIR.mkdir(parents=True, exist_ok=True)
 
-INDEXED_FILE = Path("../database/indexed_books.txt")
+INDEXED_FILE = Path("../mongodb_indexed/indexed_books.txt")
 
 # ----------------------
 # TOKENIZER
@@ -20,26 +20,30 @@ def tokenize(text: str):
     return re.findall(r"\b[a-z]{2,}\b", text.lower())
   
 # ----------------------
-# FILESYSTEM UPDATE
+# MongoDB Update
 # ----------------------
 def update_fs(term: str, book_id: int):
     """Store postings list for one term in its own file under its first letter folder."""
     first_letter = term[0].lower()
-    subdir = FS_DIR / first_letter
-    subdir.mkdir(parents=True, exist_ok=True)
+    index_db = client["invertedIndex"]
+    collection = index_db[first_letter]  # Collection for the first letter
 
-    file_path = subdir / f"{term}.json"
+    # Try to find the document for the term
+    doc = collection.find_one({"term": term})
 
-    if file_path.exists():
-        with open(file_path, "r", encoding="utf-8") as f:
-            postings = json.load(f)["postings"]
+    if doc:
+        # Term exists, update postings if book_id not already present
+        if book_id not in doc["postings"]:
+            collection.update_one(
+                {"term": term},
+                {"$push": {"postings": book_id}}
+            )
     else:
-        postings = []
-
-    if book_id not in postings:
-        postings.append(book_id)
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump({"term": term, "postings": postings}, f, indent=2)
+        # Term doesn't exist, create new document
+        collection.insert_one({
+            "term": term,
+            "postings": [book_id]
+        })
 
 # ----------------------
 # INDEXING LOGIC
@@ -76,6 +80,7 @@ def reindex_all_books():
         process_book(book_id, text)
 
 if __name__ == "__main__":
+    reindex_all_books()
     with collection.watch([{"$match": {"operationType": {"$ne": "delete"}}}]) as stream:
         print("Watching for changes in the 'books' collection...")
         for change in stream:

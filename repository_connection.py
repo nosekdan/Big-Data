@@ -4,6 +4,7 @@ from pymongo.errors import ConnectionFailure
 client = MongoClient("mongodb://localhost:27017/?replicaSet=rs0", serverSelectionTimeoutMS=5000)
 db = client["BigData"]
 collection = db["books"]
+index_db = client["invertedIndex"]
 
 def connect_to_db():
     try:
@@ -12,7 +13,6 @@ def connect_to_db():
         print("MongoDB version:", info["version"])
     except ConnectionFailure as e:
         print("❌ Could not connect to MongoDB:", e)
-
 
 def insert_into_db(books):
     if not books:
