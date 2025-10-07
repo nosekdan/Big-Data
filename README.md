@@ -36,7 +36,8 @@ The pipeline has three main steps:
    - **Full-text search**: Boolean AND queries (intersection of posting lists)  
 
 **Figure 1. System architecture of the prototype search engine.**  
-<img width="384" height="456" alt="image" src="https://github.com/user-attachments/assets/38a0308c-b7d9-4d16-992c-f32f0981d952" />
+<img width="382" height="471" alt="Diagram drawio" src="https://github.com/user-attachments/assets/e42570cc-6439-435e-a538-4379f4e27154" />
+
 
 ## Execution
 Run the crawler:
