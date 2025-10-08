@@ -7,7 +7,7 @@ This project implements a **prototype search engine** for Project Gutenberg text
 ## Main Goals
 - Download books from **Project Gutenberg**  
 - Build inverted indexes using **two different backends**:  
-  - SQLite (relational database, single file)  
+  - filesystem database  
   - MongoDB (NoSQL, document-based)  
 - Implement a minimal **query engine** for metadata and full-text search  
 - Benchmark both solutions to compare performance  
@@ -35,8 +35,7 @@ The pipeline has three main steps:
    - **Metadata search**: title, author, language  
    - **Full-text search**: Boolean AND queries (intersection of posting lists)  
 
-**Figure 1. System architecture of the prototype search engine.**  
-<img width="382" height="471" alt="Diagram drawio" src="https://github.com/user-attachments/assets/e42570cc-6439-435e-a538-4379f4e27154" />
+
 
 
 ## Execution
